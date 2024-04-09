@@ -13,7 +13,7 @@ private:
 	{
 		int counter = 0;
 
-		for (int i = 0; str[i] != '\0'; i++)
+		for (int i = 0; str[i] && str[i] != '\0'; i++)
 			counter++;
 
 		return counter;
@@ -22,7 +22,7 @@ private:
 public:
 	String()
 	{
-		symbols = NULL;
+		symbols = new char[100];
 		size = 0;
 	}
 
@@ -35,14 +35,12 @@ public:
 	String(const String& other)
 	{
 		symbols = other.symbols;
+		size = other.size;
 	}
 
-	~String()
-	{
-		delete symbols;
-	}
+	~String() {}
 
-	int size()
+	int GetSize()
 	{
 		return size;
 	}
@@ -75,7 +73,7 @@ public:
 
 	void clear()
 	{
-		delete[] symbols;
+		delete symbols;
 	}
 
 	bool empty()
@@ -94,9 +92,9 @@ public:
 
 	void append(int n, char c)
 	{
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++)
 			symbols[size + i] = c;
-		}
+
 		symbols[size + n] = '\0';
 	}
 
@@ -138,6 +136,116 @@ public:
 
 	void find(char* substr, int pos = 0)
 	{
+		//
+	}
 
+	friend ifstream& operator>>(ifstream& in, String& str) // перегрузка оператора ввода
+	{
+		in >> str.symbols;
+
+		int counter = 0;
+
+		for (int i = 0; str.symbols[i] && str.symbols[i] != '\0'; i++)
+			counter++;
+
+		str.size = counter;
+		return in;
+	}
+
+	friend ofstream& operator<<(ofstream& out, const String& str)  // перегрузка оператора вывода
+	{
+		for (int i = 0; i < str.size; i++)
+			out << str.symbols[i];
+
+		return out;
+	}
+
+	bool operator==(const String& str)
+	{
+		cout << size << " " << str.size << endl;
+		if (size != str.size)
+			return false;
+
+		for (int i = 0; i < size; i++) {
+			cout << symbols[i] << " " << str.symbols[i] << endl;
+			if (symbols[i] != str.symbols[i])
+				return false;
+		}
+			
+
+		return true;
+	}
+
+	void operator=(const String& str)
+	{
+		symbols = str.symbols;
+	}
+
+	String operator+(const String& other) const
+	{
+		int strSize = 0;
+
+		for (int i = 0; other.symbols[i] != '\0'; i++)
+			strSize++;
+
+		for (int i = 0; i < strSize; i++) {
+			symbols[size + i] = other.symbols[i];
+		}
+
+		symbols[size + strSize] = '\0';
+
+		return String(symbols);
 	}
 };
+
+int main()
+{
+	int key, tmp;
+	ifstream in("input.txt");
+	ofstream out("output.txt");
+
+	in >> key;
+
+	char text[100];
+	char text2[100];
+	//in.getline(text, 100, '\0');
+	//in >> text;
+	//in >> text2;
+	
+
+	if (key == 1) { // Конструктор по умолчанию
+		String str;
+		out << str;
+	}
+	else if (key == 2) { // Конструктор инициализации
+		String str = String(text);
+		out << str;
+	}
+	else if (key == 3) { // Copy constructor
+		String str = String(text);
+		String str2 = String(str);
+		out << str2;
+	}
+	else if (key == 4) { // =
+		//String str = String(text);
+		//char text2[100];
+		//in.getline(text2, 100, '\0');
+		//String str2 = String(text2);
+		String str, str2;
+		in >> str;
+		in >> str2;
+
+		out << str << endl;
+		out << str2 << endl;
+
+		if (str == str2)
+			out << "Equal";
+		else
+			out << "Not equal";
+	}
+
+	in.close();
+	out.close();
+
+	return 0;
+}

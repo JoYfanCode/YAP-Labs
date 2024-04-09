@@ -179,6 +179,7 @@ void methodology(ifstream& ifs_fin, ofstream& ofs_out) {
 
 }
 
+/*
 int main()
 {
    // Создаём объекты и привязываем их к необходимым файлам
@@ -193,3 +194,4 @@ int main()
     ofs_out.close();
 
 }
+*/
