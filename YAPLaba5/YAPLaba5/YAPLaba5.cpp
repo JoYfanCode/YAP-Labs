@@ -9,6 +9,8 @@ private:
 	char* symbols;
 	int size;
 
+	const int LIMIT_SIZE = 100;
+
 	int CountSize(char* str)
 	{
 		int counter = 0;
@@ -22,7 +24,7 @@ private:
 public:
 	String()
 	{
-		symbols = new char[100];
+		symbols = new char[LIMIT_SIZE];
 		size = 0;
 	}
 
@@ -56,6 +58,8 @@ public:
 			}
 			symbols[size + n] = '\0';
 		}
+
+		size = n;
 	}
 
 	void resize(int n, char c)
@@ -69,11 +73,14 @@ public:
 			}
 			symbols[size + n] = '\0';
 		}
+
+		size = n;
 	}
 
 	void clear()
 	{
 		delete symbols;
+		size = 0;
 	}
 
 	bool empty()
@@ -88,6 +95,7 @@ public:
 	{
 		symbols[size] = c;
 		symbols[size + 1] = '\0';
+		size++;
 	}
 
 	void append(int n, char c)
@@ -96,6 +104,7 @@ public:
 			symbols[size + i] = c;
 
 		symbols[size + n] = '\0';
+		size += n;
 	}
 
 	void append(char* str)
@@ -107,39 +116,10 @@ public:
 		}
 
 		symbols[size + strSize] = '\0';
+		size += strSize;
 	}
 
-	void append(char* str, int pos, int n)
-	{
-		for (int i = 0; i < n; i++) {
-			symbols[pos + i] = str[i];
-		}
-
-		symbols[pos + n] = '\0';
-	}
-
-	void insert(int start, int n,  char c)
-	{
-		for (int i = 0; i < n; i++) {
-			symbols[start + i] = c;
-		}
-		symbols[start + n] = '\0';
-	}
-
-	void substr(int pos, int count)
-	{
-		char* str = new char[count];
-
-		for (int i = 0; i < size; i++)
-			str[i] = symbols[pos + i];
-	}
-
-	void find(char* substr, int pos = 0)
-	{
-		//
-	}
-
-	friend ifstream& operator>>(ifstream& in, String& str) // перегрузка оператора ввода
+	friend ifstream& operator>>(ifstream& in, String& str)
 	{
 		in >> str.symbols;
 
@@ -152,7 +132,7 @@ public:
 		return in;
 	}
 
-	friend ofstream& operator<<(ofstream& out, const String& str)  // перегрузка оператора вывода
+	friend ofstream& operator<<(ofstream& out, const String& str)
 	{
 		for (int i = 0; i < str.size; i++)
 			out << str.symbols[i];
@@ -179,6 +159,7 @@ public:
 	void operator=(const String& str)
 	{
 		symbols = str.symbols;
+		size = str.size;
 	}
 
 	String operator+(const String& other) const
@@ -196,52 +177,82 @@ public:
 
 		return String(symbols);
 	}
+
+	char& operator[](int i)
+	{
+		return symbols[i];
+	}
 };
 
 int main()
 {
-	int key, tmp;
+	int key = 0;
+	const int LIMIT_SIZE = 100;
 	ifstream in("input.txt");
 	ofstream out("output.txt");
 
 	in >> key;
 
-	char text[100];
-	char text2[100];
-	//in.getline(text, 100, '\0');
-	//in >> text;
-	//in >> text2;
-	
-
-	if (key == 1) { // Конструктор по умолчанию
+	if (key == 1) { // Default constructor
 		String str;
 		out << str;
 	}
-	else if (key == 2) { // Конструктор инициализации
+	else if (key == 2) { // Initialization constructor
+		char text[LIMIT_SIZE];
+		in >> text;
 		String str = String(text);
 		out << str;
 	}
 	else if (key == 3) { // Copy constructor
-		String str = String(text);
-		String str2 = String(str);
+		char text[LIMIT_SIZE];
+		String str1 = String(text);
+		String str2 = String(str1);
 		out << str2;
 	}
-	else if (key == 4) { // =
-		//String str = String(text);
-		//char text2[100];
-		//in.getline(text2, 100, '\0');
-		//String str2 = String(text2);
+	else if (key == 4) { // ==
 		String str, str2;
 		in >> str;
 		in >> str2;
-
-		out << str << endl;
-		out << str2 << endl;
 
 		if (str == str2)
 			out << "Equal";
 		else
 			out << "Not equal";
+	}
+	else if (key == 5) { // =
+		String str1, str2;
+		in >> str1;
+		str2 = str1;
+		out << str2;
+	}
+	else if (key == 6) { // +
+		String str1, str2;
+		in >> str1 >> str2;
+		out << str1 + str2;
+	}
+	else if (key == 7) { // resize
+		String str;
+		in >> str;
+		str.resize(10, '1');
+		out << str;
+	}
+	else if (key == 8) { // push_back
+		String str;
+		in >> str;
+		str.push_back('1');
+		out << str;
+	}
+	else if (key == 9) { // append
+		String str;
+		char* text = new char[LIMIT_SIZE];
+		in >> str >> text;
+		str.append(text);
+		out << str;
+	}
+	else if (key == 10) { // GetSize
+		String str;
+		in >> str;
+		out << str.GetSize();
 	}
 
 	in.close();

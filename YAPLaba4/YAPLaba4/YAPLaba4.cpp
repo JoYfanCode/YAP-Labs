@@ -1,88 +1,187 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <cmath>
 using namespace std;
 
-struct tree
+template <typename T>
+class Node
 {
-    int i_val;
-    tree* left;
-    tree* right;
-    tree(int x) : i_val(x), left(NULL), right(NULL) {}
+public:
+    T Data;
+    Node<T>* Left;
+    Node<T>* Right;
+
+public:
+    Node(T Data)
+    {
+        this->Data = Data;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
 };
 
-void insert(tree*& root, int i_val)
+template <typename T>
+class BinaryTree
 {
-    if (root == NULL) {
-        root = new tree(i_val);
-        return;
-    }
-    if (i_val < root->i_val) {
-        insert(root->left, i_val);
-    }
-    else {
-        insert(root->right, i_val);
-    }
-}
+private:
+    Node<T>* Root;
+    int Length;
 
-tree* F_T_ReadTree(const char* filename)
-{
-    tree* T = NULL;
-
-    ifstream file;
-    file.open(filename);
-
-    int a;
-
-    while (!file.eof())
+public:
+    BinaryTree()
     {
-        file >> a;
-        insert(T, abs(a));
-
+        this->Root = NULL;
+        this->Length = 0;
     }
-
-    file.close();
-
-    return T;
-}
-
-void F_V_WriteNodeInOrder(ofstream& fout, tree* node)
-{
-    if (node)
+    ~BinaryTree()
     {
-        F_V_WriteNodeInOrder(fout, node->left);
-        fout << node->i_val << " ";
-        F_V_WriteNodeInOrder(fout, node->right);
+        delete_tree(Root);
     }
-}
 
-void F_V_WriteTree(const char* filename, tree* T)
-{
-    ofstream fout;
-    fout.open(filename);
-
-    F_V_WriteNodeInOrder(fout, T);
-
-    fout.close();
-}
-
-void F_V_DelTree(tree*& node)
-{
-    if (node)
+    void delete_tree(Node<T>* node)
     {
-        F_V_DelTree(node->left);
-        F_V_DelTree(node->right);
-        delete node;
+        if (node) {
+            delete_tree(node->Left);
+            delete_tree(node->Right);
+            delete node;
+        }
     }
-}
+
+    void append(T Data)
+    {
+        if (isEmpty()) { // First node
+            Root = new Node<T>(Data);
+            Length++;
+            return;
+        }
+
+        Node<T>* node = Root;
+        while (node && node->Data != Data) {
+            if (node->Data < Data && node->Left == NULL) { // left is free
+                node->Left = new Node<T>(Data);
+                Length++;
+                return;
+            }
+            if (node->Data > Data && node->Right == NULL) { // right is free
+                node->Right = new Node<T>(Data);
+                Length++;
+                return;
+            }
+
+            if (node->Data < Data)
+                node = node->Left;
+            else
+                node = node->Right;
+        }
+    }
+
+    void erase(T key)
+    {
+        Node<T>* node = Root;
+        Node<T>* parent = NULL;
+
+        while (node && node->Data != key) { // try to find node
+            parent = node;
+            if (node->Data < key)
+                node = node->Left;
+            else
+                node = node->Right;
+        }
+
+        if (!node) return;
+
+        if (node->Left == NULL) { // left node is free
+            if (parent && parent->Left == node)
+                parent->Left = node->Right;
+            else if (parent && parent->Right == node)
+                parent->Right = node->Right;
+
+            Length--;
+            delete node;
+            return;
+        }
+        else if (node->Right == NULL) { // right node is free
+            if (parent && parent->Left == node)
+                parent->Left = node->Left;
+            else if (parent && parent->Right == node)
+                parent->Right = node->Left;
+
+            Length--;
+            delete node;
+            return;
+        }
+
+        Node<T>* replace = node->Right; // left and right nodes arent free
+        while (replace->Left)
+            replace = replace->Left;
+        T replaceValue = replace->Data;
+        erase(replaceValue);
+        node->Data = replaceValue;
+    }
+
+    bool findKey(T key)
+    {
+        Node<T>* node = Root;
+
+        while (node && node->Data != key) {
+            if (node->Data > key)
+                node = node->Left;
+            else
+                node = node->Right;
+        }
+
+        return node != NULL;
+    }
+
+    bool isEmpty()
+    {
+        return (Length == 0) ? true : false;
+    }
+
+    int getLength()
+    {
+        return Length;
+    }
+
+    void print(ofstream& out) 
+    {
+        print_tree(out, Root);
+    }
+
+    void print_tree(ofstream& out, Node<T>* node)
+    {
+        if (node) {
+            out << node->Data << " ";
+            print_tree(out, node->Left);
+            print_tree(out, node->Right);
+        }
+    }
+};
 
 int main()
 {
-    tree* T;
+    BinaryTree<double> tree;
 
-    T = F_T_ReadTree("input.txt");
+    ifstream in;
+    ofstream out;
 
-    F_V_WriteTree("output.txt", T);
+    in.open("input.txt");
+    if (!in.is_open())
+    {
+        out << "Error! File cannot be opened" << endl;
+        return 0;
+    }
 
-    F_V_DelTree(T);
+    double tmp;
+    while (in >> tmp)
+        tree.append(tmp); // input data
+
+    out.open("output.txt");
+    out.precision(15);
+
+    tree.print(out); // output data
+
+    in.close();
+    out.close();
+
+    return 0;
 }
