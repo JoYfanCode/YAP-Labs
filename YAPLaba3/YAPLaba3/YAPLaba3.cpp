@@ -19,7 +19,7 @@ public:
 };
 
 template <typename T>
-class СyclicalOneLinkedList
+class CyclicalOneLinkedList
 {
 private:
     Node<T>* Head;
@@ -27,14 +27,14 @@ private:
     int Length;
 
 public:
-    СyclicalOneLinkedList()
+    CyclicalOneLinkedList()
     {
         this->Head = NULL;
         this->Tail = NULL;
         this->Length = 0;
     }
 
-    ~СyclicalOneLinkedList()
+    ~CyclicalOneLinkedList()
     {
         while (!isEmpty()) pop_front();
     }
@@ -56,7 +56,7 @@ public:
     {
         Node<T>* node = new Node<T>(Data);
 
-        if (Head == NULL) 
+        if (Head == NULL)
             Head = node;
         else
             Tail->Next = node;
@@ -69,17 +69,17 @@ public:
 
     T pop_front()
     {
-        if (isEmpty()) 
+        if (isEmpty())
             return 0;
 
-        if (Length == 1) 
+        if (Length == 1)
         {
             T Data = Head->Data;
             delete Head;
             Length--;
             return Data;
         }
-        else 
+        else
         {
             T Data = Head->Data;
             Node<T>* node = Head;
@@ -93,17 +93,17 @@ public:
 
     T pop_back()
     {
-        if (isEmpty()) 
+        if (isEmpty())
             return 0;
 
-        if (Length == 1) 
+        if (Length == 1)
         {
             T Data = Tail->Data;
             delete Tail;
             Length--;
             return Data;
         }
-        else 
+        else
         {
             T Data = Tail->Data;
             Node<T>* node = Head;
@@ -215,18 +215,13 @@ public:
         }
     }
 
-    void print()
+    void print(ofstream& out)
     {
-        ofstream out;
-        out.open("output.txt");
-
         Node<T>* node = Head;
         for (int i = 0; i < Length; i++) {
             out << node->Data << " ";
             node = node->Next;
         }
-
-        out.close();
     }
 
     void doublePrint()
@@ -235,7 +230,7 @@ public:
         out.open("output.txt");
 
         Node<T>* node = Head;
-        for (int i = 0; i < 2*Length; i++) {
+        for (int i = 0; i < 2 * Length; i++) {
             out << node->Data << " ";
             node = node->Next;
         }
@@ -255,7 +250,7 @@ public:
 
     T& operator[] (int i)
     {
-        if (i < 0 || i >= Length) 
+        if (i < 0 || i >= Length)
             exit(1);
 
         return getAt(i);
@@ -264,10 +259,11 @@ public:
 
 int main()
 {
-    СyclicalOneLinkedList<double> list;
+    CyclicalOneLinkedList<double> list;
 
     ifstream in;
-    
+    ofstream out;
+
     in.open("input.txt");
 
     bool flagSort;;
@@ -281,16 +277,23 @@ int main()
     if (list.getLength() == 0)
         return 0;
 
+    out.open("output.txt");
+    out.precision(15);
+    out << list.getLength() << " ";
+
     if (flagSort == 0) // Sort
     {
         list.bubbleSort();
-        list.print();
+        list.print(out);
     }
     else
     {
         list.quickSort();
-        list.print();
+        list.print(out);
     }
+
+    in.close();
+    out.close();
 
     return 0;
 }
